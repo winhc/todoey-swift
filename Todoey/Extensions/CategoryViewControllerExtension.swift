@@ -13,15 +13,15 @@ import UIKit
 extension CategoryViewController{
     // MARK: - TableView DataSource Method
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        return categories?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellIdentifier, for: indexPath)
         
-        let category = categoryArray[indexPath.row]
+        let category = categories?[indexPath.row]
         
-        cell.textLabel?.text = category.name
+        cell.textLabel?.text = category?.name
         
         return cell
     }

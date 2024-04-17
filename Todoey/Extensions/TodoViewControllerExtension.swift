@@ -16,16 +16,16 @@ extension TodoViewController {
     //MARK: - Table View Data Source Delegate
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        return items?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.todoCellIdentifier, for: indexPath)
         
-        let item = itemArray[indexPath.row]
-        
-        cell.textLabel?.text = item.title
-        cell.accessoryType = item.isDone ? .checkmark : .none
+        if let item = items?[indexPath.row] {
+            cell.textLabel?.text = item.title
+            cell.accessoryType = item.isDone ? .checkmark : .none
+        }
         
         return cell
     }
@@ -34,16 +34,19 @@ extension TodoViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let item = itemArray[indexPath.row]
-        
-//        context.delete(item)
-//        itemArray.remove(at: indexPath.row)
-        
-        
-        item.isDone = !item.isDone
-        
-        saveItems()
-        
+        if let item = items?[indexPath.row] {
+            do{
+                try self.realm.write {
+                    item.isDone = !item.isDone
+//                    realm.delete(item)
+                }
+            }catch{
+                print("Error saving isDone status realm => \(error)")
+            }
+            
+            tableView.reloadData()
+            
+        }
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
@@ -51,20 +54,10 @@ extension TodoViewController {
 //MARK: - SearchUIView Implementation
 extension TodoViewController: UISearchBarDelegate{
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        
         if let searchText = searchBar.text {
-            let request: NSFetchRequest<Todo> = Todo.fetchRequest()
-            
-            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchText)
-            
-//            request.predicate = predicate
-            
-            let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
-            
-            request.sortDescriptors = [sortDescriptor]
-            
-            loadItems(with: request,predicate: predicate)
-            
+            print(searchText)
+            items = items?.filter("title CONTAINS[cd] %@", searchText).sorted(byKeyPath: "dateCreated",ascending: true)
+            self.tableView.reloadData()
         }
         
     }

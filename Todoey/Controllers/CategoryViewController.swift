@@ -8,12 +8,13 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
-
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    var categoryArray: [Category] = []
+    let realm = try! Realm()
+    
+    var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,12 +41,10 @@ class CategoryViewController: UITableViewController {
             (action) in
             if let name = textField.text, textField.text != "" {
                 
-                let category = Category(context: self.context)
+                let category = Category()
                 category.name = name
-                
-                self.categoryArray.append(category)
-                
-                self.saveCategory()
+                                
+                self.saveCategory(category: category)
                 
             }
         }
@@ -59,29 +58,28 @@ class CategoryViewController: UITableViewController {
         let destinationVC = segue.destination as! TodoViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
     // MARK: - Data Manipulation Method
     
-    func saveCategory(){
+    func saveCategory(category: Category){
         do{
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         }catch {
-            print("Error saving context => \(error)")
+            print("Error saving realm => \(error)")
         }
         self.tableView.reloadData()
     }
     
-    func loadCategory(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    func loadCategory() {
         
-        do{
-            categoryArray = try context.fetch(request)
-            self.tableView.reloadData()
-        } catch {
-            print("Error fetching data from context => \(error)")
-        }
+        categories = realm.objects(Category.self).sorted(byKeyPath: "dateCreated", ascending: true)
+        
+        tableView.reloadData()
     }
     
 }

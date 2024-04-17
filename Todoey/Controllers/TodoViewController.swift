@@ -7,11 +7,13 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class TodoViewController: UITableViewController {
     
-    var itemArray: [Todo] = []
+    let realm = try! Realm()
+    
+    var items: Results<Item>?
     
     var selectedCategory: Category? {
         didSet{
@@ -19,11 +21,7 @@ class TodoViewController: UITableViewController {
         }
     }
     
-    //    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("todo.plist")
     @IBOutlet weak var todoUISearchBar: UISearchBar!
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,9 +34,6 @@ class TodoViewController: UITableViewController {
         
         self.navigationController?.navigationBar.prefersLargeTitles = true
         
-//        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-//        
-//        loadItems()
     }
     
     @IBAction func addUIBarButtonItemPressed(_ sender: UIBarButtonItem) {
@@ -56,14 +51,18 @@ class TodoViewController: UITableViewController {
             (action) in
             if let itemName = textField.text, textField.text != "" {
                 
-                let item = Todo(context: self.context)
-                item.title = itemName
-                item.isDone = false
-                item.category = self.selectedCategory
-                
-                self.itemArray.append(item)
-                
-                self.saveItems()
+                if let currentCategory = self.selectedCategory {
+                    do {
+                        try self.realm.write{
+                            let item = Item()
+                            item.title = itemName
+                            currentCategory.items.append(item)
+                        }
+                    }catch{
+                        print("Error saving realm => \(error)")
+                    }
+                    self.tableView.reloadData()
+                }
                 
             }
         }
@@ -74,56 +73,11 @@ class TodoViewController: UITableViewController {
         
     }
     
-    func saveItems(){
-        do{
-            try context.save()
-        }catch {
-            print("Error saving context => \(error)")
-        }
-        self.tableView.reloadData()
+    
+    func loadItems() {
+        items = selectedCategory?.items.sorted(byKeyPath: "dateCreated",ascending: true)
+        tableView.reloadData()
     }
-    
-    func loadItems(with request: NSFetchRequest<Todo> = Todo.fetchRequest(), predicate: NSPredicate? = nil) {
-        
-        let categoryPredicate = NSPredicate(format: "category.name MATCHES %@", selectedCategory!.name!)
-        
-        if let additionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-        } else {
-            request.predicate = categoryPredicate
-        }
-        
-        
-        do{
-            itemArray = try context.fetch(request)
-            self.tableView.reloadData()
-        } catch {
-            print("Error fetching data from context => \(error)")
-        }
-    }
-    
-    
-    //    func saveItems(){
-    //        let encoder = PropertyListEncoder()
-    //        do{
-    //            let data = try encoder.encode(self.itemArray)
-    //            try data.write(to: self.dataFilePath!)
-    //        }catch {
-    //            print("Error encoding array \(error)")
-    //        }
-    //        self.tableView.reloadData()
-    //    }
-    //
-    //    func loadItems() {
-    //        if let data = try? Data(contentsOf: dataFilePath!){
-    //            let decoder = PropertyListDecoder()
-    //            do{
-    //                itemArray = try decoder.decode([Todo].self, from: data)
-    //            }catch{
-    //                print("Decode error \(error)")
-    //            }
-    //        }
-    //    }
     
 }
 
