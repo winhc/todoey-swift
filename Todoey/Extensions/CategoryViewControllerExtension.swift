@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+//import ChameleonFramework
 
 extension CategoryViewController{
     
@@ -21,6 +22,8 @@ extension CategoryViewController{
         let category = categories?[indexPath.row]
         
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        
+//        cell.backgroundColor = .randomFlat()
         
         cell.textLabel?.text = category?.name
         

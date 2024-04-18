@@ -28,12 +28,12 @@ class TodoViewController: SwipeTableViewController {
         
         todoUISearchBar.delegate = self
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         if let title = selectedCategory?.name{
             self.navigationItem.title = title
         }
-        
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-        
     }
     
     @IBAction func addUIBarButtonItemPressed(_ sender: UIBarButtonItem) {
