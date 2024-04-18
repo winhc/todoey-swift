@@ -7,19 +7,20 @@
 //
 
 import Foundation
-import CoreData
 import UIKit
 
 extension CategoryViewController{
+    
     // MARK: - TableView DataSource Method
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellIdentifier, for: indexPath)
         
         let category = categories?[indexPath.row]
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = category?.name
         

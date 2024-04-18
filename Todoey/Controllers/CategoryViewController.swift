@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -43,7 +43,7 @@ class CategoryViewController: UITableViewController {
                 
                 let category = Category()
                 category.name = name
-                                
+                
                 self.saveCategory(category: category)
                 
             }
@@ -80,6 +80,21 @@ class CategoryViewController: UITableViewController {
         categories = realm.objects(Category.self).sorted(byKeyPath: "dateCreated", ascending: true)
         
         tableView.reloadData()
+    }
+    
+    // MARK: - override update model
+    override func updateModel(at indexPath: IndexPath) {
+        super.updateModel(at: indexPath)
+        if let safetyCategories = self.categories {
+            do{
+                try self.realm.write {
+                    self.realm.delete(safetyCategories[indexPath.row].items)
+                    self.realm.delete(safetyCategories[indexPath.row])
+                }
+            }catch{
+                print("Delete Error \(error)")
+            }
+        }
     }
     
 }

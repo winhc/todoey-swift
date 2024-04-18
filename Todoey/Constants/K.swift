@@ -9,8 +9,7 @@
 import Foundation
 
 class K {
-    static let todoCellIdentifier: String = "TodoItemCell"
+    static let cellIdentifier: String = "Cell"
     static let todoeyUserDefaultKey: String = "TodoeyUserDefaultKey"
-    static let categoryCellIdentifier: String = "CategoryCell"
     static let goToTodoUITableViewIdentifier: String = "goToTodoUITableView"
 }

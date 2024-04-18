@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoViewController: UITableViewController {
+class TodoViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -77,6 +77,19 @@ class TodoViewController: UITableViewController {
     func loadItems() {
         items = selectedCategory?.items.sorted(byKeyPath: "dateCreated",ascending: true)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        super.updateModel(at: indexPath)
+        if let item = items?[indexPath.row] {
+            do{
+                try self.realm.write {
+                    realm.delete(item)
+                }
+            }catch{
+                print("Error deleting item realm => \(error)")
+            }
+        }
     }
     
 }
